@@ -129,7 +129,6 @@ BlPhanideBrowser >> installComponentModel: aComponentModel [
 	self registerNamedComponent: aComponentModel.
 
 	anchorHolder := self perform: aComponentModel installLocation.
-	Stdio stdout nextPutAll: 'installBlPhanideComponentPresenter:'; lf.
 	anchorHolder installBlPhanideComponentPresenter: aComponentModel
 
 ]
@@ -228,7 +227,7 @@ BlPhanideBrowser >> populateComponents [
 
 { #category : #'as yet unclassified' }
 BlPhanideBrowser >> populateSpace [
-	| container mainContainer centerColumn rightColumn |
+	| container mainContainer leftColumn centerColumn bottomRow rightColumn |
 	self
 		createMenuBar;
 		createToolbar;
@@ -239,26 +238,60 @@ BlPhanideBrowser >> populateSpace [
 			constraintsDo: [ :c |
 				c horizontal matchParent.
 				c vertical matchParent].
+
+	leftColumn := BlElement new 
+		layout: BlLinearLayout vertical;
+		constraintsDo: [ :c |
+			c horizontal exact: 300.
+			c vertical matchParent ];
+		addChild: (leftTabs := self createBottomTabGroup).
+	bottomRow := BlElement new
+		layout: BlLinearLayout horizontal;
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical exact: 200 ];
+		addChild: (bottomTabs := self createBottomTabGroup).
+		
 	centerColumn := BlElement new
 		layout: BlLinearLayout vertical;
 		constraintsDo: [ :c |
 			c horizontal matchParent.
 			c vertical matchParent ];
 		addChild: (mainTabs := self createTopTabGroup);
-		addChild: (bottomTabs := self createBottomTabGroup).
+		addChild: (BrResizer new
+				look: BrGlamorousResizerLook;
+				target: bottomRow;
+				beTop);
+		addChild: (bottomRow).
 		
 	rightColumn := BlElement new
 		layout: BlLinearLayout vertical;
 		constraintsDo: [ :c |
-			c horizontal matchParent.
+			c horizontal exact: 200.
 			c vertical matchParent ];
 		addChild: (rightTopTabs := self createBottomTabGroup);
+		addChild: (BrResizer new
+				look: BrGlamorousResizerLook;
+				target: rightTopTabs;
+				beBottom);
 		addChild: (rightMiddleTabs := self createBottomTabGroup);
+		addChild: (BrResizer new
+				look: BrGlamorousResizerLook;
+				target: rightMiddleTabs;
+				beBottom);
 		addChild: (rightBottomTabs := self createBottomTabGroup).
 	mainContainer := BlElement new
 		layout: BlLinearLayout horizontal;
-		addChild: (leftTabs := self createBottomTabGroup);
+		addChild: leftColumn;
+		addChild: (BrResizer new
+				beRight;
+				look: BrGlamorousResizerLook;
+				target: leftColumn);
 		addChild: centerColumn;
+		addChild: (BrResizer new
+				beLeft;
+				look: BrGlamorousResizerLook;
+				target: rightColumn);
 		addChild: rightColumn.
 
 	space addChild: container.
