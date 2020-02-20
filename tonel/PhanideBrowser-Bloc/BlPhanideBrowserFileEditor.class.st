@@ -9,6 +9,31 @@ Class {
 	#category : #'PhanideBrowser-Bloc'
 }
 
+{ #category : #'as yet unclassified' }
+BlPhanideBrowserFileEditor class >> editorForFile: aFileReference [
+	self allSubclassesDo: [ :sc |
+		(sc isSuitableEditorFor: aFileReference) ifTrue: [ 
+			^ sc
+		]
+	].
+	self allSubclassesDo: [ :sc |
+		(sc isFallbackEditorFor: aFileReference) ifTrue: [ 
+			^ sc
+		]
+	].
+	^ BlPhanideBrowserHexEditor
+]
+
+{ #category : #testing }
+BlPhanideBrowserFileEditor class >> isFallbackEditorFor: aFileReference [
+	^ false
+]
+
+{ #category : #testing }
+BlPhanideBrowserFileEditor class >> isSuitableEditorFor: aFileReference [
+	^ false
+]
+
 { #category : #api }
 BlPhanideBrowserFileEditor >> closeable [
 	^ true

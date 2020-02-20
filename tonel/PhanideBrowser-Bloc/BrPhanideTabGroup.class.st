@@ -11,9 +11,14 @@ BrPhanideTabGroup >> installBlPhanideComponentPresenter: component [
 		look: BrGlamorousTabLook new;
 		label: component label;
 		stencil: [component blockElement
+			padding: (BlInsets all: 10);
 			constraintsDo: [:c |
 				c horizontal matchParent.
 				c vertical matchParent ]].
-	component anchor: tab.
+	component anchor: (BlPhanideComponentTabAnchor new
+		component: component;
+		tabGroup: self;
+		tab: tab;
+		yourself).
 	self addTab: tab
 ]

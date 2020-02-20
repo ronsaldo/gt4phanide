@@ -22,6 +22,16 @@ BlPhanideBrowserFileTreeTab >> blockElement [
 						ifTrue: [ GLMUIThemeExtraIcons glamorousFolder ]
 						ifFalse: [ GLMUIThemeExtraIcons glamorousBrowse ]];
 				text: [ :aFileReference | aFileReference basename asRopedText glamorousRegularFontAndSize ]).
+	tree when: BrSelectionDoubleClicked do: [ :anEvent |
+		tree selectedNodeDo: [ :selectedNode |
+			browser openFileView: selectedNode value
+		]
+	].
+	tree when: BrSelectionChanged do: [:anEvent |
+		tree selectedNodeDo: [ :selectedNode |
+			browser openFileViewTemporarily: selectedNode value
+		]
+	].
 	^ tree
 ]
 

@@ -55,6 +55,12 @@ BlPhanideBrowserComponent >> defaultName [
 	^ self class name
 ]
 
+{ #category : #'as yet unclassified' }
+BlPhanideBrowserComponent >> destroyBrowserComponent [
+	browser removeComponent: self.
+	anchor ifNotNil: [ anchor destroy ]
+]
+
 { #category : #initialization }
 BlPhanideBrowserComponent >> initializeWithBrowser: aBrowser [
 	browser := aBrowser.
@@ -78,9 +84,20 @@ BlPhanideBrowserComponent >> label: aNewLabel [
 
 ]
 
+{ #category : #'as yet unclassified' }
+BlPhanideBrowserComponent >> makeActive [
+	anchor ifNotNil: [ anchor makeActive ]
+]
+
 { #category : #accessing }
 BlPhanideBrowserComponent >> name [
 	^ name ifNil: [ name := self defaultName ]
+]
+
+{ #category : #accessing }
+BlPhanideBrowserComponent >> name: aNewName [
+	name ifNotNil: [ browser component: self renamedFrom: name into: aNewName ].
+	name := aNewName
 ]
 
 { #category : #'as yet unclassified' }

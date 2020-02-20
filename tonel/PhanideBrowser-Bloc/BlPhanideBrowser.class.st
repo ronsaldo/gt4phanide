@@ -44,6 +44,16 @@ BlPhanideBrowser >> bottomTabs [
 ]
 
 { #category : #'as yet unclassified' }
+BlPhanideBrowser >> component: component renamedFrom: oldName into: newName [
+	oldName = newName ifTrue: [ ^ self ].
+	
+	componentDictionary at: oldName ifPresent: [ 
+		componentDictionary removeKey: oldName.
+		componentDictionary at: newName put: component
+	]
+]
+
+{ #category : #'as yet unclassified' }
 BlPhanideBrowser >> createBottomTabGroup [
 	^ BrPhanideTabGroup new
 		look: BrPhanideBottomTabGroupLook new;
@@ -134,9 +144,67 @@ BlPhanideBrowser >> mainTabs [
 	^ mainTabs
 ]
 
+{ #category : #'as yet unclassified' }
+BlPhanideBrowser >> makeTemporaryEditorPermanent: tempEditor [
+	^ tempEditor
+		name: tempEditor fileReference printString;
+		temporaryEditor: false;
+		makeActive
+]
+
 { #category : #'instance creation' }
 BlPhanideBrowser >> open [
 	^ self space show
+]
+
+{ #category : #'as yet unclassified' }
+BlPhanideBrowser >> openFileView: aFileReference [
+	| editor |
+	aFileReference isFile ifFalse: [ ^ nil ].
+	componentDictionary at: self temporaryFileEditorName ifPresent: [ :tempEditor |
+		tempEditor fileReference = aFileReference ifTrue: [
+			^ self makeTemporaryEditorPermanent: tempEditor
+		].
+	].
+
+	componentDictionary at: aFileReference printString ifPresent: [ :existentEditor |
+		^ existentEditor makeActive.
+	].
+	
+	editor := (BlPhanideBrowserFileEditor editorForFile: aFileReference) for: self.
+	editor
+		fileReference: aFileReference;
+		name: aFileReference printString.
+	self installComponentModel: editor.
+	^ editor makeActive
+]
+
+{ #category : #'as yet unclassified' }
+BlPhanideBrowser >> openFileViewTemporarily: aFileReference [
+	| editor |
+	aFileReference isFile ifFalse: [ ^ nil ].
+	
+	"Make active the existent file"
+	componentDictionary at: aFileReference printString ifPresent: [ :existentEditor |
+		^ existentEditor makeActive
+	].
+
+	"Check the existent temporary file editor"
+	componentDictionary at: self temporaryFileEditorName ifPresent: [ :existentEditor |
+		existentEditor fileReference = aFileReference ifTrue: [
+			^ existentEditor makeActive
+		] ifFalse: [
+			existentEditor destroyBrowserComponent
+		]
+	].
+
+	editor := (BlPhanideBrowserFileEditor editorForFile: aFileReference) for: self.
+	editor
+		temporaryEditor: true;
+		fileReference: aFileReference;
+		name: self temporaryFileEditorName.
+	self installComponentModel: editor.
+	^ editor makeActive
 ]
 
 { #category : #'as yet unclassified' }
@@ -224,6 +292,13 @@ BlPhanideBrowser >> registerNamedComponent: tabModel [
 		ifAbsentPut: [ tabModel ]
 ]
 
+{ #category : #removing }
+BlPhanideBrowser >> removeComponent: aComponent [
+	(componentDictionary includesKey: aComponent name) ifTrue: [
+		componentDictionary removeKey: aComponent name
+	].
+]
+
 { #category : #accessing }
 BlPhanideBrowser >> rightBottomTabs [
 	^ rightBottomTabs
@@ -247,4 +322,9 @@ BlPhanideBrowser >> space [
 		yourself.
 	self populateSpace.
 	^ space
+]
+
+{ #category : #'as yet unclassified' }
+BlPhanideBrowser >> temporaryFileEditorName [
+	^ #temporaryFileEditor
 ]
